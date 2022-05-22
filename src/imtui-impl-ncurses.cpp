@@ -34,6 +34,8 @@
 #include <string>
 #include <thread>
 
+#include <unistd.h>
+
 namespace {
     struct VSync {
         VSync(double fps_active = 60.0, double fps_idle = 60.0) :
@@ -93,6 +95,8 @@ namespace {
 
 static VSync g_vsync;
 static ImTui::TScreen * g_screen = nullptr;
+#include <sys/types.h>
+#include <sys/stat.h>
 
 ImTui::TScreen * ImTui_ImplNcurses_Init(bool mouseSupport, float fps_active, float fps_idle) {
     if (g_screen == nullptr) {
@@ -105,7 +109,13 @@ ImTui::TScreen * ImTui_ImplNcurses_Init(bool mouseSupport, float fps_active, flo
     fps_idle = std::min(fps_active, fps_idle);
     g_vsync = VSync(fps_active, fps_idle);
 
-    initscr();
+    char * myfifo = new char [13];
+    strcpy(myfifo, "/tmp/myfifo2");
+    mkfifo(myfifo, S_IRUSR | S_IWUSR);
+    FILE* fd = fopen(myfifo, "w");
+    auto screen = newterm(NULL, fd, stdin);
+    // initscr();
+    set_term(screen);
     use_default_colors();
     start_color();
     cbreak();
@@ -362,6 +372,7 @@ void ImTui_ImplNcurses_DrawScreen(bool active) {
 
     g_vsync.wait(nActiveFrames --> 0);
 }
+
 
 bool ImTui_ImplNcurses_ProcessEvent() {
     return true;
