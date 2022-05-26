@@ -109,13 +109,15 @@ ImTui::TScreen * ImTui_ImplNcurses_Init(bool mouseSupport, float fps_active, flo
     fps_idle = std::min(fps_active, fps_idle);
     g_vsync = VSync(fps_active, fps_idle);
 
-    char * myfifo = new char [13];
-    strcpy(myfifo, "/tmp/myfifo2");
-    mkfifo(myfifo, S_IRUSR | S_IWUSR);
-    FILE* fd = fopen(myfifo, "w");
-    auto screen = newterm(NULL, fd, stdin);
-    // initscr();
+    char * myfifo2 = new char [13];
+    strcpy(myfifo2, "/tmp/myfifo2");
+    FILE* fd2 = fopen(myfifo2, "w");
+    char * myfifo3 = new char [13];
+    strcpy(myfifo3, "/tmp/myfifo3");
+    FILE* fd3 = fopen(myfifo3, "r");
+    auto screen = newterm(NULL, fd2, fd3);
     set_term(screen);
+
     use_default_colors();
     start_color();
     cbreak();
