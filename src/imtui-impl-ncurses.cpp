@@ -98,6 +98,17 @@ static ImTui::TScreen * g_screen = nullptr;
 #include <sys/types.h>
 #include <sys/stat.h>
 
+ImTui::TScreen * ImTui_ImplNcurses_Init(const std::string& input, const std::string& output,
+                                        bool mouseSupport, float fps_active, float fps_idle) {
+    mkfifo(input.c_str(), S_IRUSR | S_IWUSR);
+    mkfifo(output.c_str(), S_IRUSR | S_IWUSR);
+    FILE* fd_input = fopen(input.c_str(), "r");
+    FILE* fd_output = fopen(output.c_str(), "w");
+    auto screen = newterm(NULL, fd_output, fd_input);
+    set_term(screen);
+    return ImTui_ImplNcurses_Init(mouseSupport, fps_active, fps_idle);
+}
+
 ImTui::TScreen * ImTui_ImplNcurses_Init(bool mouseSupport, float fps_active, float fps_idle) {
     if (g_screen == nullptr) {
         g_screen = new ImTui::TScreen();
@@ -108,17 +119,6 @@ ImTui::TScreen * ImTui_ImplNcurses_Init(bool mouseSupport, float fps_active, flo
     }
     fps_idle = std::min(fps_active, fps_idle);
     g_vsync = VSync(fps_active, fps_idle);
-
-    char* myfifo2 = new char [13];
-    strcpy(myfifo2, "/tmp/myfifo2");
-    mkfifo(myfifo2, S_IRUSR | S_IWUSR);
-    FILE* fd2 = fopen(myfifo2, "w");
-    char* myfifo3 = new char [13];
-    strcpy(myfifo3, "/tmp/myfifo3");
-    mkfifo(myfifo3, S_IRUSR | S_IWUSR);
-    FILE* fd3 = fopen(myfifo3, "r");
-    auto screen = newterm(NULL, fd2, fd3);
-    set_term(screen);
 
     use_default_colors();
     start_color();
