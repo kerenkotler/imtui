@@ -302,6 +302,7 @@ void ImTui_ImplNcurses_DrawScreen(bool active) {
     if (active) nActiveFrames = 10;
 
     wrefresh(stdscr);
+    redrawwin(stdscr);
 
     int nx = g_screen->nx;
     int ny = g_screen->ny;
